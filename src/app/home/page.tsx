@@ -134,12 +134,14 @@ export default function Home() {
               tracks: { items: [] },
             } as SpotifySearchResult)
           }
+          selectedId={selection?.id}
           onInputChange={debouncedSearch}
           onSelect={({ name, id, type }) => {
             setSelection({ name, id, type });
             setSpotifySearchResults(undefined);
           }}
         />
+        <pre>{JSON.stringify(selection, undefined, 4)}</pre>
       </div>
       <p></p>
     </main>

@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
-import cn from "clsx";
+import { Check, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Command,
   CommandEmpty,
@@ -37,10 +37,12 @@ interface SpotifySearchResult {
 
 export function SpotifySearchbox({
   spotifyResponse,
+  selectedId,
   onInputChange,
   onSelect,
 }: {
   spotifyResponse: SpotifySearchResult;
+  selectedId?: string;
   onInputChange: (value: string) => void;
   onSelect: ({
     name,
@@ -53,7 +55,7 @@ export function SpotifySearchbox({
   }) => void;
 }) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  const [inputValue, setInputValue] = React.useState("");
   const allItems = React.useMemo(
     () => [...spotifyResponse.artists.items, ...spotifyResponse.tracks.items],
     [spotifyResponse]
@@ -68,9 +70,10 @@ export function SpotifySearchbox({
           aria-expanded={open}
           className="w-[300px] justify-between"
         >
-          {value
-            ? allItems.find((item) => item.id === value)?.name
+          {inputValue
+            ? allItems.find((item) => item.id === selectedId)?.name
             : "Search Spotify"}
+          <Search className="ml-2" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
@@ -79,7 +82,7 @@ export function SpotifySearchbox({
             placeholder="Track or artist name"
             onValueChange={onInputChange}
           />
-          <CommandEmpty>No artists found.</CommandEmpty>
+          <CommandEmpty>No results found.</CommandEmpty>
           {spotifyResponse.artists?.items.length > 0 && (
             <CommandGroup>
               {allItems.map((item) => (
@@ -93,18 +96,21 @@ export function SpotifySearchbox({
                       currentValue,
                     });
                     onSelect({ name: item.name, id: item.id, type: item.type });
-                    setValue(item.name);
+                    setInputValue(item.name);
                     setOpen(false);
-                    console.log({ value });
+                    console.log({ value: inputValue });
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === item.id ? "opacity-100" : "opacity-0"
+                      inputValue === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {item.name}
+                  <div className="">
+                    <p>{item.name}</p>
+                    <p>{item.type}</p>
+                  </div>
                 </CommandItem>
               ))}
             </CommandGroup>
