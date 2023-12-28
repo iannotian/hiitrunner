@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { SpotifySearchbox } from "@/components/ui/spotify-combobox";
+import { SpotifySearchbox } from "@/components/ui/spotify-searchbox";
 import { useDebounce } from "./debounce";
 
 interface SpotifySearchResult {
