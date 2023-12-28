@@ -40,6 +40,11 @@ export default function SpotifyAuthCallback() {
 
     console.log(response);
 
+    if (response.error) {
+      console.error(response.error_description);
+      return;
+    }
+
     localStorage.setItem("accessToken", response.access_token);
     localStorage.setItem("refreshToken", response.refresh_token);
     localStorage.setItem("expiresIn", response.expires_in);
@@ -63,10 +68,6 @@ export default function SpotifyAuthCallback() {
 
       if (timeLeft < 0) {
         console.log("Access token expired");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("expiresIn");
-        localStorage.removeItem("storedAt");
 
         // TODO: refresh token flow instead of redirecting to spotify
         // refreshAccessToken(refreshToken: string).then(() => {
