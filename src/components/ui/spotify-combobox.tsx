@@ -22,6 +22,7 @@ interface SpotifySearchResult {
     items: {
       id: string;
       name: string;
+      type: "artist";
     }[];
   };
 
@@ -29,19 +30,34 @@ interface SpotifySearchResult {
     items: {
       id: string;
       name: string;
+      type: "track";
     }[];
   };
 }
 
 export function SpotifySearchbox({
   spotifyResponse,
-  onChange,
+  onInputChange,
+  onSelect,
 }: {
   spotifyResponse: SpotifySearchResult;
-  onChange: (value: string) => void;
+  onInputChange: (value: string) => void;
+  onSelect: ({
+    name,
+    id,
+    type,
+  }: {
+    name: string;
+    id: string;
+    type: string;
+  }) => void;
 }) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+  const allItems = React.useMemo(
+    () => [...spotifyResponse.artists.items, ...spotifyResponse.tracks.items],
+    [spotifyResponse]
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -53,10 +69,7 @@ export function SpotifySearchbox({
           className="w-[300px] justify-between"
         >
           {value
-            ? [
-                ...spotifyResponse.artists.items,
-                ...spotifyResponse.tracks.items,
-              ].find((item) => item.name === value)?.name
+            ? allItems.find((item) => item.id === value)?.name
             : "Search Spotify"}
         </Button>
       </PopoverTrigger>
@@ -64,21 +77,25 @@ export function SpotifySearchbox({
         <Command>
           <CommandInput
             placeholder="Track or artist name"
-            onValueChange={onChange}
+            onValueChange={onInputChange}
           />
           <CommandEmpty>No artists found.</CommandEmpty>
           {spotifyResponse.artists?.items.length > 0 && (
             <CommandGroup>
-              {[
-                ...spotifyResponse.artists.items,
-                ...spotifyResponse.tracks.items,
-              ].map((item) => (
+              {allItems.map((item) => (
                 <CommandItem
                   key={item.id}
                   value={item.name}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    console.log({
+                      name: item.name,
+                      id: item.id,
+                      currentValue,
+                    });
+                    onSelect({ name: item.name, id: item.id, type: item.type });
+                    setValue(item.name);
                     setOpen(false);
+                    console.log({ value });
                   }}
                 >
                   <Check

@@ -9,20 +9,66 @@ interface SpotifySearchResult {
     items: {
       id: string;
       name: string;
+      type: "artist";
     }[];
   };
-
   tracks: {
     items: {
       id: string;
       name: string;
+      type: "track";
     }[];
   };
 }
 
+interface SpotifyErrorResponse {
+  error: {
+    status: number;
+    message: string;
+  };
+}
+
+const refreshAccessToken = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  if (!refreshToken) {
+    console.error("No refresh token found in local storage");
+    return;
+  }
+
+  const url = `https://accounts.spotify.com/api/token`;
+
+  const payload = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID as string,
+    }),
+  };
+
+  const body = await fetch(url, payload);
+  const response = await body.json();
+
+  if ("error" in response) {
+    console.error(response.error);
+    return;
+  }
+
+  localStorage.setItem("accessToken", response.access_token);
+};
+
 export default function Home() {
   const [spotifySearchResults, setSpotifySearchResults] =
     React.useState<SpotifySearchResult>();
+  const [selection, setSelection] = React.useState<{
+    name: string;
+    id: string;
+    type: string;
+  }>();
 
   const getSpotifySearchResults = async (query: string) => {
     const accessToken = localStorage.getItem("accessToken");
@@ -42,9 +88,23 @@ export default function Home() {
     };
 
     const body = await fetch(url, payload);
-    const response = (await body.json()) as SpotifySearchResult;
+    const response = (await body.json()) as
+      | SpotifySearchResult
+      | SpotifyErrorResponse;
 
-    console.log(response);
+    if ("error" in response) {
+      if (
+        response.error.status === 401 &&
+        response.error.message === "The access token expired"
+      ) {
+        // the access token expired, so we need to refresh it
+        refreshAccessToken();
+        // try again with the new access token
+        getSpotifySearchResults(query);
+      }
+
+      return;
+    }
 
     setSpotifySearchResults(response);
   };
@@ -74,7 +134,11 @@ export default function Home() {
               tracks: { items: [] },
             } as SpotifySearchResult)
           }
-          onChange={debouncedSearch}
+          onInputChange={debouncedSearch}
+          onSelect={({ name, id, type }) => {
+            setSelection({ name, id, type });
+            setSpotifySearchResults(undefined);
+          }}
         />
       </div>
       <p></p>
