@@ -59,6 +59,7 @@ const refreshAccessToken = async () => {
   }
 
   localStorage.setItem("accessToken", response.access_token);
+  localStorage.setItem("refreshToken", response.refresh_token);
 };
 
 export default function Home() {
