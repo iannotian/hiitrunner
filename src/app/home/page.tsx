@@ -282,7 +282,7 @@ export default function Home() {
                   Take a look at your new workout playlist!
                 </DrawerDescription>
               </DrawerHeader>
-              <Card className="flex flex-col gap-6 p-8 max-h-[60vh] overflow-y-scroll">
+              <Card className="flex flex-col gap-6 p-8 max-h-[50vh] overflow-y-scroll">
                 {playlist?.tracks.map((track) => {
                   return (
                     <div key={track.id} className="flex flex-row gap-4">
@@ -307,15 +307,17 @@ export default function Home() {
                 })}
               </Card>
               <DrawerFooter className="">
-                <Button>Add to Spotify</Button>
-                <DrawerClose>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPlaylist(undefined)}
-                  >
-                    Cancel
-                  </Button>
-                </DrawerClose>
+                <div className="flex gap-2">
+                  <DrawerClose>
+                    <Button
+                      variant="outline"
+                      onClick={() => setPlaylist(undefined)}
+                    >
+                      Cancel
+                    </Button>
+                  </DrawerClose>
+                  <Button>Add to Spotify</Button>
+                </div>
               </DrawerFooter>
             </DrawerContent>
           </Drawer>
