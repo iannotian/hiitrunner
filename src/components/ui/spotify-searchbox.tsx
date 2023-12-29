@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Check, Search } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -37,12 +37,16 @@ interface SpotifySearchResult {
 
 export function SpotifySearchbox({
   spotifyResponse,
-  selectedId,
+  selectedItem,
   onInputChange,
   onSelect,
 }: {
   spotifyResponse: SpotifySearchResult;
-  selectedId?: string;
+  selectedItem?: {
+    name: string;
+    id: string;
+    type: string;
+  };
   onInputChange: (value: string) => void;
   onSelect: ({
     name,
@@ -71,9 +75,8 @@ export function SpotifySearchbox({
           className="w-[300px] justify-between"
         >
           {inputValue
-            ? allItems.find((item) => item.id === selectedId)?.name
+            ? `${selectedItem?.name} (${selectedItem?.type})`
             : "Search Spotify"}
-          <Search className="ml-2" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0">
@@ -98,13 +101,12 @@ export function SpotifySearchbox({
                     onSelect({ name: item.name, id: item.id, type: item.type });
                     setInputValue(item.name);
                     setOpen(false);
-                    console.log({ value: inputValue });
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      inputValue === item.id ? "opacity-100" : "opacity-0"
+                      selectedItem?.id === item.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                   <div className="">
