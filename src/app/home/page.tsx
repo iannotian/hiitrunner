@@ -385,6 +385,8 @@ export default function Home() {
           <a
             className="pointer-events-none cursor-pointer flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
             onClick={() => {
+              localStorage.removeItem("storedAt");
+              localStorage.removeItem("expiresIn");
               localStorage.removeItem("accessToken");
               localStorage.removeItem("refreshToken");
               window.location.href = "/";
