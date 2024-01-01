@@ -381,6 +381,18 @@ export default function Home() {
             HIITRunner by @ian.not.ian
           </a>
         </div>
+        <div className="fixed bottom-0 right-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
+          <a
+            className="pointer-events-none cursor-pointer flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
+            onClick={() => {
+              localStorage.removeItem("accessToken");
+              localStorage.removeItem("refreshToken");
+              window.location.href = "/";
+            }}
+          >
+            Log Out
+          </a>
+        </div>
       </div>
       <div className="flex flex-shrink-0">
         <Card className="flex flex-col gap-6 p-8">
