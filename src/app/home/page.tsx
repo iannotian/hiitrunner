@@ -255,25 +255,24 @@ export default function Home() {
             />
           </div>
           <Drawer>
-            <DrawerTrigger disabled={!selection}>
-              <Button
-                disabled={!selection}
-                onClick={() => {
-                  generatePlaylist({
-                    seedArtists:
-                      selection?.type === "artist" ? [selection?.id] : [""],
-                    seedTracks:
-                      selection?.type === "track" ? [selection?.id] : [""],
-                    minTempo: BPMRange[0],
-                    maxTempo: BPMRange[1],
-                  }).then((response) => {
-                    console.log(response);
-                    setPlaylist(response);
-                  });
-                }}
-              >
-                Generate
-              </Button>
+            <DrawerTrigger
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+              disabled={!selection}
+              onClick={() => {
+                generatePlaylist({
+                  seedArtists:
+                    selection?.type === "artist" ? [selection?.id] : [""],
+                  seedTracks:
+                    selection?.type === "track" ? [selection?.id] : [""],
+                  minTempo: BPMRange[0],
+                  maxTempo: BPMRange[1],
+                }).then((response) => {
+                  console.log(response);
+                  setPlaylist(response);
+                });
+              }}
+            >
+              Generate
             </DrawerTrigger>
             <DrawerContent className="flex flex-col gap-4 justify-center items-center">
               <DrawerHeader>
