@@ -4,16 +4,86 @@ import React from "react";
 
 import { useRouter } from "next/navigation";
 
+const refreshAccessToken = async () => {
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  if (!refreshToken) {
+    console.error("No refresh token found in local storage");
+    return;
+  }
+
+  const url = `https://accounts.spotify.com/api/token`;
+
+  const payload = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID as string,
+    }),
+  };
+
+  const body = await fetch(url, payload);
+  const response = await body.json();
+
+  if ("error" in response) {
+    console.error(response.error);
+    return;
+  }
+
+  localStorage.setItem("accessToken", response.access_token);
+  localStorage.setItem("refreshToken", response.refresh_token);
+};
+
+const getCurrentUser = async (): Promise<{ id: string } | undefined> => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  if (!accessToken) {
+    console.error("No access token found in local storage");
+    return;
+  }
+
+  const url = `https://api.spotify.com/v1/me`;
+
+  const payload = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  };
+
+  const body = await fetch(url, payload);
+  const response = await body.json();
+
+  if ("error" in response) {
+    if (
+      response.error.status === 401 &&
+      response.error.message === "The access token expired"
+    ) {
+      // the access token expired, so we need to refresh it
+      refreshAccessToken();
+      // try again with the new access token
+      return getCurrentUser();
+    }
+
+    return;
+  }
+
+  return response as { id: string };
+};
+
 export default function Home() {
   const router = useRouter();
 
   React.useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
-
-    if (accessToken && refreshToken) {
-      router.push("/home");
-    }
+    getCurrentUser().then((user) => {
+      if (user && "id" in user) {
+        router.push("/home");
+      }
+    });
   }, [router]);
 
   const generateCodeVerifier = () => {
