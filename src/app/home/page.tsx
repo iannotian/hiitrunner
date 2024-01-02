@@ -327,6 +327,14 @@ export default function Home() {
     React.useState<SpotifyRecommendationsResponse>();
   const [playlistIsSaved, setPlaylistIsSaved] = React.useState(false);
 
+  React.useEffect(() => {
+    getCurrentUser().then((user) => {
+      if (!user || !("id" in user)) {
+        window.location.href = "/";
+      }
+    });
+  }, []);
+
   const getSpotifySearchResults = async (query: string) => {
     const accessToken = localStorage.getItem("accessToken");
 
