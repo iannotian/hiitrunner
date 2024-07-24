@@ -187,6 +187,8 @@ const getCurrentUser = async (): Promise<{ id: string } | undefined> => {
   return response as { id: string };
 };
 
+type Playlist = { id: string; external_urls: { spotify: string } };
+
 const createPlaylist = async ({
   userId,
   name,
@@ -195,7 +197,7 @@ const createPlaylist = async ({
   userId: string;
   name: string;
   description: string;
-}): Promise<{ id: string } | undefined> => {
+}): Promise<Playlist | undefined> => {
   const accessToken = localStorage.getItem("accessToken");
 
   if (!accessToken) {
@@ -233,7 +235,7 @@ const createPlaylist = async ({
     return;
   }
 
-  return response as { id: string };
+  return response as Playlist;
 };
 
 const addTracksToPlaylist = async ({
@@ -285,9 +287,11 @@ const addTracksToPlaylist = async ({
 const handleSavePlaylistButtonClick = async ({
   playlistName,
   trackIds,
+  setSavedPlaylistUrl,
 }: {
   playlistName: string;
   trackIds: string[];
+  setSavedPlaylistUrl: (url: string) => void;
 }) => {
   const currentUser = await getCurrentUser();
 
@@ -312,6 +316,10 @@ const handleSavePlaylistButtonClick = async ({
     playlistId: playlist.id,
     trackIds,
   });
+
+  setSavedPlaylistUrl(playlist.external_urls.spotify);
+
+  window.location.href = playlist.external_urls.spotify;
 };
 
 export default function Home() {
@@ -326,6 +334,7 @@ export default function Home() {
   const [playlist, setPlaylist] =
     React.useState<SpotifyRecommendationsResponse>();
   const [playlistIsSaved, setPlaylistIsSaved] = React.useState(false);
+  const [savedPlaylistUrl, setSavedPlaylistUrl] = React.useState<string>();
 
   React.useEffect(() => {
     getCurrentUser().then((user) => {
@@ -513,15 +522,14 @@ export default function Home() {
                         playlistName: `${selection?.name} Workout Playlist (${BPMRange[0]} - ${BPMRange[1]} BPM)`,
                         trackIds:
                           playlist?.tracks.map((track) => track.id) || [],
+                        setSavedPlaylistUrl,
                       }).then(() => {
                         setPlaylistIsSaved(true);
                       });
                     }}
                     disabled={playlistIsSaved}
                   >
-                    {playlistIsSaved
-                      ? "Playlist Saved!"
-                      : "Save Playlist to Spotify"}
+                    {playlistIsSaved ? "Playlist Saved!" : "Open in Spotify"}
                   </Button>
                 </div>
               </DrawerFooter>
